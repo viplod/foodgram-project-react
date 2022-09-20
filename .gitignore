@@ -140,4 +140,4 @@ dmypy.json
 .vscode/
 *.code-workspace
 
-frontend/
+frontend/*

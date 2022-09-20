@@ -3,6 +3,7 @@ from django.db import models
 
 
 class User(AbstractUser):
+    """Кастомизированная модель для работы с пользователями"""
     username = models.CharField(
         max_length=150
     )
