@@ -1,9 +1,10 @@
 from rest_framework import viewsets
 from users.permissions import AdminOrReadonly
 
-from .models import Recipe, Tag, Ingredient
-from .serializers import (RecipesSerializer, TagsSerializer,
-                          IngredientsSerializer)
+from .models import Ingredient, Recipe, Tag
+from .serializers import (IngredientsSerializer,
+                          RecipesSerializer,
+                          TagsSerializer)
 
 
 class TagsViewSet(viewsets.ModelViewSet):

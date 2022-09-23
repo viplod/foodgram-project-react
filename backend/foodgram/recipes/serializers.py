@@ -1,10 +1,10 @@
 import base64
-from django.core.files.base import ContentFile
-# from django.shortcuts import get_object_or_404
 
+from django.core.files.base import ContentFile
 from rest_framework import serializers
 from users.serializers import UserSerializer
-from .models import Ingredient, Recipe, Tag, IngredientInRecipe
+
+from .models import FavoriteRecipe, Ingredient, IngredientInRecipe, Recipe, Tag
 
 
 class Base64ImageField(serializers.ImageField):
@@ -18,16 +18,27 @@ class Base64ImageField(serializers.ImageField):
 
 class TagsSerializer(serializers.ModelSerializer):
     """Сериалиатор для упаковки тегов"""
-    # name = serializers.CharField(source='name')
 
     class Meta:
         model = Tag
         fields = ('id', 'name', 'color', 'slug')
 
 
+class IngredientsInRecipesSerializer(serializers.ModelSerializer):
+    """Сериализатор для работы с моделью IngredientsInRecipes"""
+    id = serializers.ReadOnlyField(source='ingredient.id')
+    name = serializers.ReadOnlyField(source='ingredient.name')
+    measurement_unit = serializers.ReadOnlyField(
+        source='ingredient.measuerment_unit'
+    )
+
+    class Meta:
+        model = IngredientInRecipe
+        fields = ('id', 'name', 'amount', 'measurement_unit')
+
+
 class IngredientsSerializer(serializers.ModelSerializer):
     """Сериалиатор для упаковки ингредиентов"""
-
     class Meta:
         model = Ingredient
         fields = ('id', 'name', 'measurement_unit')
@@ -36,28 +47,43 @@ class IngredientsSerializer(serializers.ModelSerializer):
 class RecipesSerializer(serializers.ModelSerializer):
     """Сериализатор для упаковки рецептов"""
     tags = TagsSerializer(many=True, read_only=True)
-    ingredients = IngredientsSerializer(many=True, read_only=True)
+    ingredients = IngredientsInRecipesSerializer(
+        many=True,
+        source='ingredientinrecipe',
+        read_only=True)
     image = Base64ImageField(required=False, allow_null=True)
     author = UserSerializer(read_only=True)
+    is_favorited = serializers.SerializerMethodField()
 
     class Meta:
         model = Recipe
         fields = ('id', 'tags', 'author', 'ingredients', 'name',
-                  'image', 'text', 'cooking_time')
+                  'image', 'text', 'cooking_time', 'is_favorited')
+
+    def get_is_favorited(self, obj):
+        request = self.context.get('request')
+        if request is None or request.user.is_anonymous:
+            return False
+        return FavoriteRecipe.objects.filter(
+            recipe=obj, user=request.user).exists()
 
     def create(self, validated_data):
         print(self.initial_data)
+        print('////////')
+        print(validated_data)
         tags = self.initial_data['tags']
         recipe = Recipe.objects.create(**validated_data)
         if tags:
             for tag in tags:
                 recipe.tags.add(tag)
+        ingredients = self.initial_data['ingredients']
+        if ingredients:
+            for ingredient in ingredients:
+                print(ingredient)
+                IngredientInRecipe.objects.create(
+                    recipe=recipe,
+                    ingredient_id=ingredient['id'],
+                    amount=ingredient['amount']
+                )
         recipe.save()
         return recipe
-
-
-class IngredientsInRecipesSerializer(serializers.ModelSerializer):
-    """Сериализатор для работы с моделью IngredientsInRecipes"""
-    class Meta:
-        fields = ('recipe', 'ingredient', 'amount')
-        model = IngredientInRecipe

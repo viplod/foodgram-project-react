@@ -71,9 +71,13 @@ class Recipe(models.Model):
     ingredients = models.ManyToManyField(
         Ingredient,
         verbose_name='Ингредиенты',
-        # through=''
+        through='IngredientInRecipe'
     )
-    tags = models.ManyToManyField(Tag, through='TagRecipe', verbose_name='Теги')
+    tags = models.ManyToManyField(
+        Tag,
+        through='TagRecipe',
+        verbose_name='Теги'
+    )
 
     class Meta:
         verbose_name = 'Рецепт'
@@ -113,8 +117,17 @@ class IngredientInRecipe(models.Model):
     )
     amount = models.PositiveIntegerField('Количество')
 
-    # class Meta:
-    # ordering = ('recipe',)
-
     def __str__(self):
         return f'{self.recipe} {self.ingredient}'
+
+
+class FavoriteRecipe(models.Model):
+    """Вспомогательная модель для модели Recipe, поле is_favorite"""
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE
+    )
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE
+    )
