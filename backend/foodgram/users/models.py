@@ -21,3 +21,31 @@ class User(AbstractUser):
 
     def __str__(self):
         return str(self.username)
+
+
+class Follow(models.Model):
+    """Модель для работы с подписками на авторов"""
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='follower'
+    )
+
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='following'
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'author'],
+                name='user_author'
+            )
+        ]
+        verbose_name = 'Подписка'
+        verbose_name_plural = 'Подписки'
+
+    def __str__(self):
+        return f'{self.user} подписан {self.author}'

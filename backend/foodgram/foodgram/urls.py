@@ -14,8 +14,7 @@ router.register(r'ingredients', IngredientsViewSet)
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
-    path('api/', include('djoser.urls')),
-    re_path(r'^api/auth/', include('djoser.urls.authtoken')),
+    path('api/', include('users.urls')),
 ]
 
 if settings.DEBUG:

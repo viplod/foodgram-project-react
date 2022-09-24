@@ -68,9 +68,6 @@ class RecipesSerializer(serializers.ModelSerializer):
             recipe=obj, user=request.user).exists()
 
     def create(self, validated_data):
-        print(self.initial_data)
-        print('////////')
-        print(validated_data)
         tags = self.initial_data['tags']
         recipe = Recipe.objects.create(**validated_data)
         if tags:
@@ -87,3 +84,12 @@ class RecipesSerializer(serializers.ModelSerializer):
                 )
         recipe.save()
         return recipe
+
+
+class FollowRecipeSerializer(serializers.ModelSerializer):
+    """Сериализатор для упаковки рецептов в Follow"""
+    image = Base64ImageField(required=False, allow_null=True)
+
+    class Meta:
+        model = Recipe
+        fields = ('id', 'name', 'image', 'cooking_time')
