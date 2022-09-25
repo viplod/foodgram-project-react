@@ -1,10 +1,12 @@
 from django.shortcuts import get_object_or_404
+from django_filters import rest_framework as filters
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 from users.permissions import AdminOrReadonly
+from .pagination import RecipePagination
 
+from .filters import RecipeFilter
 from .models import Ingredient, FavoriteRecipe, Recipe, Tag
 from .serializers import (IngredientsSerializer,
                           RecipesSerializer,
@@ -22,7 +24,9 @@ class RecipesViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipesSerializer
     permission_classes = (AdminOrReadonly, )
-    pagination_class = LimitOffsetPagination
+    pagination_class = RecipePagination
+    filter_backends = (filters.DjangoFilterBackend, )
+    filterset_class = RecipeFilter
 
     def perform_create(self, serializer):
         return serializer.save(author=self.request.user)

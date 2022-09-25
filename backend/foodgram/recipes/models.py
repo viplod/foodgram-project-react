@@ -79,10 +79,13 @@ class Recipe(models.Model):
         verbose_name='Теги'
     )
 
+    date_pub = models.DateTimeField('Дата публикации', auto_now_add=True)
+
     class Meta:
         verbose_name = 'Рецепт'
         verbose_name_plural = 'Рецепты'
         ordering = ('name',)
+        ordering = ('-date_pub',)
 
     def __str__(self):
         return self.name[:SLICE_REVIEW]
@@ -125,9 +128,11 @@ class FavoriteRecipe(models.Model):
     """Вспомогательная модель для модели Recipe, поле is_favorite"""
     recipe = models.ForeignKey(
         Recipe,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name='favorite'
     )
     user = models.ForeignKey(
         User,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name='favorite'
     )
