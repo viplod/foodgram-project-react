@@ -149,3 +149,7 @@ DJOSER = {
         'user_create': 'users.serializers.UserCreateSerializer',
     }
 }
+
+
+DATA_DIR = Path(__file__).resolve().parent.parent.parent.parent
+STATICFILES_DIRS = (os.path.join(DATA_DIR, ''),)
