@@ -1,6 +1,6 @@
 from django_filters import rest_framework as filters
 
-from .models import Recipe
+from .models import Ingredient, Recipe
 from users.models import User
 
 
@@ -17,3 +17,11 @@ class RecipeFilter(filters.FilterSet):
         if self.request.user.is_authenticated and value is True:
             return queryset.filter(favorite__user=self.request.user)
         return queryset
+
+
+class IngredientFilter(filters.FilterSet):
+    name = filters.CharFilter(lookup_expr='istartswith')
+
+    class Meta:
+        model = Ingredient
+        fields = ('name', )

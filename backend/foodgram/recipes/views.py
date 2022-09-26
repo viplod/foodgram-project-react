@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from users.permissions import AdminOrReadonly
 from .pagination import RecipePagination
 
-from .filters import RecipeFilter
+from .filters import RecipeFilter, IngredientFilter
 from .models import Ingredient, FavoriteRecipe, Recipe, Tag
 from .serializers import (IngredientsSerializer,
                           RecipesSerializer,
@@ -54,3 +54,5 @@ class IngredientsViewSet(viewsets.ModelViewSet):
     serializer_class = IngredientsSerializer
     pagination_class = None
     permission_classes = (AdminOrReadonly, )
+    filter_backends = (filters.DjangoFilterBackend, )
+    filterset_class = IngredientFilter
