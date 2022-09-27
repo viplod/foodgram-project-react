@@ -3,10 +3,10 @@ import base64
 from django.core.files.base import ContentFile
 from rest_framework import serializers
 from users.serializers import UserSerializer
+from rest_framework.validators import UniqueTogetherValidator
 
-from .models import (FavoriteRecipe, Ingredient,
-                     IngredientInRecipe, Recipe, Tag,
-                     ShoppingRecipe)
+from .models import (FavoriteRecipe, Ingredient, IngredientInRecipe, Recipe,
+                     ShoppingRecipe, Tag)
 
 
 class Base64ImageField(serializers.ImageField):
@@ -38,6 +38,13 @@ class IngredientsInRecipesSerializer(serializers.ModelSerializer):
     class Meta:
         model = IngredientInRecipe
         fields = ('id', 'name', 'amount', 'measurement_unit')
+
+    validators = (
+        UniqueTogetherValidator(
+            queryset=IngredientInRecipe.objects.all(),
+            fields=('ingredient', 'recipe')
+        ),
+    )
 
 
 class IngredientsSerializer(serializers.ModelSerializer):
@@ -102,6 +109,7 @@ class RecipesSerializer(serializers.ModelSerializer):
             for tag in tags:
                 instance.tags.add(tag)
         ingredients = self.initial_data['ingredients']
+        IngredientInRecipe.objects.filter(recipe=instance).delete()
         if ingredients:
             for ingredient in ingredients:
                 IngredientInRecipe.objects.create(

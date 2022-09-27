@@ -7,6 +7,7 @@ coreschema==0.0.4
 cryptography==38.0.1
 defusedxml==0.7.1
 Django==3.2.15
+django-filter==22.1
 django-templated-mail==1.1.1
 djangorestframework==3.13.1
 djangorestframework-simplejwt==4.8.0
@@ -24,7 +25,7 @@ MarkupSafe==2.1.1
 mccabe==0.7.0
 oauthlib==3.2.1
 pep8-naming==0.13.2
-Pillow=9.2.0
+Pillow==9.2.0
 pycodestyle==2.9.1
 pycparser==2.21
 pyflakes==2.5.0

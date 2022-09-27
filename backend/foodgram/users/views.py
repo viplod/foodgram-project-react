@@ -1,12 +1,11 @@
 from rest_framework import status
-from rest_framework.views import APIView
-from rest_framework.generics import ListAPIView
-from rest_framework.generics import get_object_or_404
+from rest_framework.generics import ListAPIView, get_object_or_404
 from rest_framework.response import Response
-
+from rest_framework.views import APIView
 from users.permissions import AuthorOrReadonly
+
 from .models import Follow, User
-from .serializers import FollowSerializer, FollowingSerializer
+from .serializers import FollowingSerializer, FollowSerializer
 
 
 class SubscriptionsAPIView(ListAPIView):
