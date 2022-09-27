@@ -4,7 +4,9 @@ from django.core.files.base import ContentFile
 from rest_framework import serializers
 from users.serializers import UserSerializer
 
-from .models import FavoriteRecipe, Ingredient, IngredientInRecipe, Recipe, Tag
+from .models import (FavoriteRecipe, Ingredient,
+                     IngredientInRecipe, Recipe, Tag,
+                     ShoppingRecipe)
 
 
 class Base64ImageField(serializers.ImageField):
@@ -54,17 +56,26 @@ class RecipesSerializer(serializers.ModelSerializer):
     image = Base64ImageField(required=False, allow_null=True)
     author = UserSerializer(read_only=True)
     is_favorited = serializers.SerializerMethodField()
+    is_in_shopping_cart = serializers.SerializerMethodField()
 
     class Meta:
         model = Recipe
         fields = ('id', 'tags', 'author', 'ingredients', 'name',
-                  'image', 'text', 'cooking_time', 'is_favorited')
+                  'image', 'text', 'cooking_time', 'is_favorited',
+                  'is_in_shopping_cart')
 
     def get_is_favorited(self, obj):
         request = self.context.get('request')
         if request is None or request.user.is_anonymous:
             return False
         return FavoriteRecipe.objects.filter(
+            recipe=obj, user=request.user).exists()
+
+    def get_is_in_shopping_cart(self, obj):
+        request = self.context.get('request')
+        if request is None or request.user.is_anonymous:
+            return False
+        return ShoppingRecipe.objects.filter(
             recipe=obj, user=request.user).exists()
 
     def create(self, validated_data):
@@ -76,7 +87,6 @@ class RecipesSerializer(serializers.ModelSerializer):
         ingredients = self.initial_data['ingredients']
         if ingredients:
             for ingredient in ingredients:
-                print(ingredient)
                 IngredientInRecipe.objects.create(
                     recipe=recipe,
                     ingredient_id=ingredient['id'],
@@ -84,6 +94,21 @@ class RecipesSerializer(serializers.ModelSerializer):
                 )
         recipe.save()
         return recipe
+
+    def update(self, instance, validated_data):
+        tags = self.initial_data['tags']
+        if tags:
+            for tag in tags:
+                instance.tags.add(tag)
+        ingredients = self.initial_data['ingredients']
+        if ingredients:
+            for ingredient in ingredients:
+                IngredientInRecipe.objects.create(
+                    recipe=instance,
+                    ingredient_id=ingredient['id'],
+                    amount=ingredient['amount']
+                )
+        return super().update(instance, validated_data)
 
 
 class FollowRecipeSerializer(serializers.ModelSerializer):

@@ -45,7 +45,6 @@ class FollowSerializer(serializers.ModelSerializer):
         fields = ('user', 'author')
 
     def to_representation(self, instance):
-        print(instance)
         request = self.context.get('request')
         context = {'request': request}
         serializer = FollowingSerializer(
@@ -79,10 +78,10 @@ class FollowingSerializer(serializers.ModelSerializer):
 
     def get_recipes(self, obj):
         request = self.context.get('request')
-        recipe_limit = request.GET.get('recipe_limit')
-        if recipe_limit:
+        recipes_limit = request.GET.get('recipes_limit')
+        if recipes_limit:
             queryset = Recipe.objects.filter(
-                author=obj.author)[:int(recipe_limit)]
+                author=obj.author)[:int(recipes_limit)]
         else:
             queryset = Recipe.objects.filter(author=obj.author)
         recipes_serializer = recipes.serializers.FollowRecipeSerializer(
