@@ -1,33 +1,34 @@
-from http.client import HTTPResponse
 from django.shortcuts import get_object_or_404
 from django_filters import rest_framework as filters
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from users.permissions import AdminOrReadonly
+from users.permissions import AuthorOrReadonly
 from .pagination import RecipePagination
 from django.http.response import HttpResponse
+from rest_framework.permissions import IsAuthenticated
 
 from .filters import RecipeFilter, IngredientFilter
 from .models import (Ingredient, IngredientInRecipe, FavoriteRecipe,
                      Recipe, ShoppingRecipe, Tag)
 from .serializers import (IngredientsSerializer,
                           RecipesSerializer,
-                          TagsSerializer,
-                          FollowRecipeSerializer)
+                          TagsSerializer)
 
 
 class TagsViewSet(viewsets.ModelViewSet):
+    """Вью сет для работы с тегами"""
     queryset = Tag.objects.all()
     serializer_class = TagsSerializer
     pagination_class = None
-    permission_classes = (AdminOrReadonly, )
+    permission_classes = (AuthorOrReadonly, )
 
 
 class RecipesViewSet(viewsets.ModelViewSet):
+    """Вью сет для работы с рецептами"""
     queryset = Recipe.objects.all()
     serializer_class = RecipesSerializer
-    permission_classes = (AdminOrReadonly, )
+    permission_classes = (AuthorOrReadonly, )
     pagination_class = RecipePagination
     filter_backends = (filters.DjangoFilterBackend, )
     filterset_class = RecipeFilter
@@ -38,7 +39,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
     @action(detail=True,
             url_path='favorite',
             methods=['post', 'delete'],
-            # permission_classes=[is_authenticated],
+            permission_classes=[IsAuthenticated],
             )
     def favorite(self, request, pk=None):
         recipe = get_object_or_404(Recipe, id=pk)
@@ -55,7 +56,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
     @action(detail=True,
             url_path='shopping_cart',
             methods=['post', 'delete'],
-            # permission_classes=[is_authenticated],
+            permission_classes=[IsAuthenticated],
             )
     def shopping_cart(self, request, pk=None):
         recipe = get_object_or_404(Recipe, id=pk)
@@ -72,13 +73,15 @@ class RecipesViewSet(viewsets.ModelViewSet):
     @action(detail=False,
             url_path='download_shopping_cart',
             methods=['get'],
-            # permission_classes=[is_authenticated],
+            permission_classes=[IsAuthenticated],
             )
     def download_shopping_cart(self, request):
         recipes_all = request.user.shopping_cart.all()
         list_ingredients = {}
         for recipe_one in recipes_all:
-            ingredients = IngredientInRecipe.objects.filter(recipe=recipe_one.recipe)
+            ingredients = IngredientInRecipe.objects.filter(
+                recipe=recipe_one.recipe
+            )
             for ingredient in ingredients:
                 name = ingredient.ingredient.name
                 amount = ingredient.amount
@@ -96,15 +99,17 @@ class RecipesViewSet(viewsets.ModelViewSet):
                             f'({list_ingredients[elem]["measurement_unit"]}) '
                             f'- {list_ingredients[elem]["amount"]} \n')
         response = HttpResponse(on_print, 'Content-type: text/plain')
-        response['Content-Disposition'] = 'attachment; filename="shopping_cart.txt"'
+        response['Content-Disposition'] = ('attachment; '
+                                           'filename="shopping_cart.txt"')
 
         return response
 
 
 class IngredientsViewSet(viewsets.ModelViewSet):
+    """Вью сет для работы с ингредиентами"""
     queryset = Ingredient.objects.all()
     serializer_class = IngredientsSerializer
     pagination_class = None
-    permission_classes = (AdminOrReadonly, )
+    permission_classes = (AuthorOrReadonly, )
     filter_backends = (filters.DjangoFilterBackend, )
     filterset_class = IngredientFilter

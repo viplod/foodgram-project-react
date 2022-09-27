@@ -10,6 +10,7 @@ from .models import (FavoriteRecipe, Ingredient,
 
 
 class Base64ImageField(serializers.ImageField):
+    """Сериализатор для упаковки изображений в строковое представление"""
     def to_internal_value(self, data):
         if isinstance(data, str) and data.startswith('data:image'):
             format, imgstr = data.split(';base64,')

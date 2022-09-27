@@ -2,11 +2,10 @@ from djoser.serializers import (
     UserCreateSerializer as BaseUserCreateSerializer,
     UserSerializer as BaseUserSerializer)
 from rest_framework import serializers
-from rest_framework.generics import get_object_or_404
 
 import recipes
 from recipes.models import Recipe
-from .models import Follow, User
+from .models import Follow
 
 
 class UserSerializer(BaseUserSerializer):

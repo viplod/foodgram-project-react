@@ -4,20 +4,24 @@ from rest_framework.generics import ListAPIView
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 
-# from users.permissions import AdminOrReadonly
+from users.permissions import AuthorOrReadonly
 from .models import Follow, User
 from .serializers import FollowSerializer, FollowingSerializer
 
 
 class SubscriptionsAPIView(ListAPIView):
+    """API вью для работы с подпиской на авторов"""
     serializer_class = FollowingSerializer
-    # permission_classes = (AdminOrReadonly, )
+    permission_classes = (AuthorOrReadonly, )
 
     def get_queryset(self):
         return Follow.objects.filter(user=self.request.user)
 
 
 class SubscribeAPIView(APIView):
+    """API вью для подписки и отписки от авторов"""
+    permission_classes = (AuthorOrReadonly, )
+
     def post(self, request, pk=None):
         author = get_object_or_404(User, pk=pk)
         data = {'user': request.user.id, 'author': author.id}

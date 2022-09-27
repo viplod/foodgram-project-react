@@ -5,6 +5,7 @@ from users.models import User
 
 
 class RecipeFilter(filters.FilterSet):
+    """Кастомный фильтр для модели Recipe"""
     author = filters.ModelChoiceFilter(queryset=User.objects.all())
     is_favorited = filters.BooleanFilter(method='get_is_favorited')
     tags = filters.AllValuesMultipleFilter(field_name='tags__slug')
@@ -20,6 +21,7 @@ class RecipeFilter(filters.FilterSet):
 
 
 class IngredientFilter(filters.FilterSet):
+    """Кастомный фильтр для модели Ingredient"""
     name = filters.CharFilter(lookup_expr='istartswith')
 
     class Meta:

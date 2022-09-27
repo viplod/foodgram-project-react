@@ -6,6 +6,7 @@ admin.site.register(Follow)
 
 
 class UserAdmin(admin.ModelAdmin):
+    """Настройка отображенения модели User в админ-панели"""
     list_display = ('email', 'first_name', 'last_name', 'username', )
     list_filter = ('username', 'email')
 

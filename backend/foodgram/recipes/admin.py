@@ -6,6 +6,7 @@ from .models import (Ingredient, Recipe, Tag,
 
 
 class RecipeAdmin(admin.ModelAdmin):
+    """Настройка отображенения модели Recipe в админ-панели"""
     list_display = ('name', 'author', 'image', 'text',
                     'cooking_time', 'count_favorited',)
     list_filter = ('name', 'author', 'tags')
@@ -17,6 +18,7 @@ class RecipeAdmin(admin.ModelAdmin):
 
 
 class IngredientAdmin(admin.ModelAdmin):
+    """Настройка отображенения модели Ingredient в админ-панели"""
     list_filter = ('name',)
     list_display = ('name', 'measurement_unit',)
 
