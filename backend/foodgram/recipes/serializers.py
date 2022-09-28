@@ -1,22 +1,13 @@
-import base64
-
-from django.core.files.base import ContentFile
 from rest_framework import serializers
-from users.serializers import UserSerializer
 from rest_framework.validators import UniqueTogetherValidator
 
-from .models import (FavoriteRecipe, Ingredient, IngredientInRecipe, Recipe,
-                     ShoppingRecipe, Tag)
+from users.serializers import UserSerializer
 
-
-class Base64ImageField(serializers.ImageField):
-    """Сериализатор для упаковки изображений в строковое представление"""
-    def to_internal_value(self, data):
-        if isinstance(data, str) and data.startswith('data:image'):
-            format, imgstr = data.split(';base64,')
-            ext = format.split('/')[-1]
-            data = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)
-        return super().to_internal_value(data)
+from .models import (
+    FavoriteRecipe, Ingredient, IngredientInRecipe, Recipe, ShoppingRecipe,
+    Tag,
+)
+from .fields import Base64ImageField
 
 
 class TagsSerializer(serializers.ModelSerializer):
@@ -39,12 +30,12 @@ class IngredientsInRecipesSerializer(serializers.ModelSerializer):
         model = IngredientInRecipe
         fields = ('id', 'name', 'amount', 'measurement_unit')
 
-    validators = (
-        UniqueTogetherValidator(
-            queryset=IngredientInRecipe.objects.all(),
-            fields=('ingredient', 'recipe')
-        ),
-    )
+        validators = (
+            UniqueTogetherValidator(
+                queryset=IngredientInRecipe.objects.all(),
+                fields=('ingredient', 'recipe')
+            ),
+        )
 
 
 class IngredientsSerializer(serializers.ModelSerializer):
@@ -86,6 +77,17 @@ class RecipesSerializer(serializers.ModelSerializer):
         return ShoppingRecipe.objects.filter(
             recipe=obj, user=request.user).exists()
 
+    def __create_ingredient(self, recipe, ingredients):
+        obj_ingredienInRecipe = []
+        if ingredients:
+            for ingredient in ingredients:
+                obj_ingredienInRecipe.append(IngredientInRecipe(
+                    recipe=recipe,
+                    ingredient_id=ingredient['id'],
+                    amount=ingredient['amount']
+                ))
+            IngredientInRecipe.objects.bulk_create(obj_ingredienInRecipe)
+
     def create(self, validated_data):
         tags = self.initial_data['tags']
         recipe = Recipe.objects.create(**validated_data)
@@ -93,13 +95,7 @@ class RecipesSerializer(serializers.ModelSerializer):
             for tag in tags:
                 recipe.tags.add(tag)
         ingredients = self.initial_data['ingredients']
-        if ingredients:
-            for ingredient in ingredients:
-                IngredientInRecipe.objects.create(
-                    recipe=recipe,
-                    ingredient_id=ingredient['id'],
-                    amount=ingredient['amount']
-                )
+        self.create_ingredient(recipe, ingredients)
         recipe.save()
         return recipe
 
@@ -110,13 +106,7 @@ class RecipesSerializer(serializers.ModelSerializer):
                 instance.tags.add(tag)
         ingredients = self.initial_data['ingredients']
         IngredientInRecipe.objects.filter(recipe=instance).delete()
-        if ingredients:
-            for ingredient in ingredients:
-                IngredientInRecipe.objects.create(
-                    recipe=instance,
-                    ingredient_id=ingredient['id'],
-                    amount=ingredient['amount']
-                )
+        self.create_ingredient(instance, ingredients)
         return super().update(instance, validated_data)
 
 

@@ -1,22 +1,25 @@
+from django.http.response import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters import rest_framework as filters
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from rest_framework.response import Response
-from users.permissions import AuthorOrReadonly
-from .pagination import RecipePagination
-from django.http.response import HttpResponse
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 
-from .filters import RecipeFilter, IngredientFilter
-from .models import (Ingredient, IngredientInRecipe, FavoriteRecipe,
-                     Recipe, ShoppingRecipe, Tag)
-from .serializers import (IngredientsSerializer,
-                          RecipesSerializer,
-                          TagsSerializer)
+from users.permissions import AuthorOrReadonly
+
+from .filters import IngredientFilter, RecipeFilter
+from .models import (
+    FavoriteRecipe, Ingredient, IngredientInRecipe, Recipe, ShoppingRecipe,
+    Tag,
+)
+from .pagination import RecipePagination
+from .serializers import (
+    IngredientsSerializer, RecipesSerializer, TagsSerializer
+)
 
 
-class TagsViewSet(viewsets.ModelViewSet):
+class TagsViewSet(viewsets.ReadOnlyModelViewSet):
     """Вью сет для работы с тегами"""
     queryset = Tag.objects.all()
     serializer_class = TagsSerializer
@@ -36,22 +39,26 @@ class RecipesViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         return serializer.save(author=self.request.user)
 
+    def __add_or_delete_record(self, model, request, pk=None):
+        recipe = get_object_or_404(Recipe, id=pk)
+        if request.method == 'POST':
+            model.objects.create(user=request.user, recipe=recipe)
+            serializer = RecipesSerializer(recipe)
+            return Response(
+                data=serializer.data,
+                status=status.HTTP_201_CREATED)
+        model.objects.filter(
+            user=request.user, recipe=recipe).delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
     @action(detail=True,
             url_path='favorite',
             methods=['post', 'delete'],
             permission_classes=[IsAuthenticated],
             )
     def favorite(self, request, pk=None):
-        recipe = get_object_or_404(Recipe, id=pk)
-        if request.method == 'POST':
-            FavoriteRecipe.objects.create(user=request.user, recipe=recipe)
-            serializer = RecipesSerializer(recipe)
-            return Response(
-                data=serializer.data,
-                status=status.HTTP_201_CREATED)
-        FavoriteRecipe.objects.filter(
-            user=request.user, recipe=recipe).delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return self.__add_or_delete_record(FavoriteRecipe, request, pk)
+
 
     @action(detail=True,
             url_path='shopping_cart',
@@ -59,16 +66,8 @@ class RecipesViewSet(viewsets.ModelViewSet):
             permission_classes=[IsAuthenticated],
             )
     def shopping_cart(self, request, pk=None):
-        recipe = get_object_or_404(Recipe, id=pk)
-        if request.method == 'POST':
-            ShoppingRecipe.objects.create(user=request.user, recipe=recipe)
-            serializer = RecipesSerializer(recipe)
-            return Response(
-                data=serializer.data,
-                status=status.HTTP_201_CREATED)
-        ShoppingRecipe.objects.filter(
-            user=request.user, recipe=recipe).delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return self.__add_or_delete_record(ShoppingRecipe, request, pk)
+
 
     @action(detail=False,
             url_path='download_shopping_cart',
@@ -105,7 +104,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
         return response
 
 
-class IngredientsViewSet(viewsets.ModelViewSet):
+class IngredientsViewSet(viewsets.ReadOnlyModelViewSet):
     """Вью сет для работы с ингредиентами"""
     queryset = Ingredient.objects.all()
     serializer_class = IngredientsSerializer

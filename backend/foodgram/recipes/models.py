@@ -1,8 +1,8 @@
 from django.core.validators import MinValueValidator
 from django.db import models
-from users.models import User
+from django.conf import settings
 
-SLICE_REVIEW = 30
+from users.models import User
 
 
 class Tag(models.Model):
@@ -23,19 +23,19 @@ class Tag(models.Model):
         verbose_name='Slug тега',
     )
 
-    def __str__(self):
-        return self.name[:SLICE_REVIEW]
-
     class Meta:
         verbose_name = 'Тег'
         verbose_name_plural = 'Теги'
         ordering = ('name',)
 
+    def __str__(self):
+        return self.name[:settings.SLICE_REVIEW]
+
 
 class Ingredient(models.Model):
     """Модель для работы с ингредиентами"""
     name = models.CharField(
-        max_length=200,
+        max_length=200,  # В redoc - string <= 200 characters
         verbose_name='Название ингредиента'
     )
     measurement_unit = models.CharField(
@@ -49,7 +49,7 @@ class Ingredient(models.Model):
         ordering = ('name',)
 
     def __str__(self):
-        return self.name[:SLICE_REVIEW]
+        return self.name[:settings.SLICE_REVIEW]
 
 
 class Recipe(models.Model):
@@ -95,7 +95,7 @@ class Recipe(models.Model):
         ordering = ('-date_pub',)
 
     def __str__(self):
-        return self.name[:SLICE_REVIEW]
+        return self.name[:settings.SLICE_REVIEW]
 
 
 class TagRecipe(models.Model):
@@ -108,6 +108,16 @@ class TagRecipe(models.Model):
         Tag,
         on_delete=models.CASCADE
     )
+
+    class Meta:
+        verbose_name = 'Тег рецепта'
+        verbose_name_plural = 'Теги рецептов'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['recipe', 'tag'],
+                name='recipe_tag'
+            )
+        ]
 
     def __str__(self):
         return f'{self.recipe} {self.tag}'
@@ -127,16 +137,18 @@ class IngredientInRecipe(models.Model):
     )
     amount = models.PositiveIntegerField('Количество')
 
-    def __str__(self):
-        return f'{self.recipe} - {self.ingredient}'
-
     class Meta:
+        verbose_name = 'Ингредиент в рецепте'
+        verbose_name_plural = 'Ингредиенты в рецептах'
         constraints = [
             models.UniqueConstraint(
                 fields=['recipe', 'ingredient'],
                 name='recipe_ingredient'
             )
         ]
+
+    def __str__(self):
+        return f'{self.recipe} - {self.ingredient}'
 
 
 class FavoriteRecipe(models.Model):
@@ -152,6 +164,19 @@ class FavoriteRecipe(models.Model):
         related_name='favorite'
     )
 
+    class Meta:
+        verbose_name = 'Рецепт в избранном'
+        verbose_name_plural = 'Рецепты в избранном'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'recipe'],
+                name='recipe_favorite'
+            )
+        ]
+
+    def __str__(self):
+        return f'{self.recipe} - {self.user}'
+
 
 class ShoppingRecipe(models.Model):
     """Вспомогательная модель для модели Recipe, поле is_in_shopping_cart"""
@@ -165,3 +190,16 @@ class ShoppingRecipe(models.Model):
         on_delete=models.CASCADE,
         related_name='shopping_cart'
     )
+
+    class Meta:
+        verbose_name = 'Рецепт в списке покупок'
+        verbose_name_plural = 'Рецепты в списках покупок'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'recipe'],
+                name='recipe_shopping'
+            )
+        ]
+
+    def __str__(self):
+        return f'{self.recipe} - {self.user}'

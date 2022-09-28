@@ -1,15 +1,15 @@
 import csv
 import os.path
 
+from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 
-from foodgram.settings import STATICFILES_DIRS
 from recipes.models import Ingredient
 
 
 def get_model_csv_filename():
     csv_file = 'ingredients.csv'
-    file_path = f'{STATICFILES_DIRS[0]}data/{csv_file}'
+    file_path = f'{settings.STATICFILES_DIRS[0]}data/{csv_file}'
     return file_path if os.path.isfile(file_path) else None
 
 
@@ -30,14 +30,13 @@ class Command(BaseCommand):
             reader = csv.reader(f)
             for count, row in enumerate(reader):
                 name, measurement_unit = row
-                print(name, measurement_unit)
                 try:
                     Ingredient.objects.update_or_create(
                         name=name,
                         measurement_unit=measurement_unit,
                     )
                 except Exception:
-                    raise CommandError('Can`t create model "%s"' % name)
+                    raise CommandError(f'Can`t create model {name}')
 
             self.stdout.write(
                 self.style.SUCCESS(
