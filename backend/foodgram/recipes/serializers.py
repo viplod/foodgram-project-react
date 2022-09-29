@@ -78,15 +78,15 @@ class RecipesSerializer(serializers.ModelSerializer):
             recipe=obj, user=request.user).exists()
 
     def __create_ingredient(self, recipe, ingredients):
-        obj_ingredienInRecipe = []
+        obj_ingredieninrecipe = []
         if ingredients:
             for ingredient in ingredients:
-                obj_ingredienInRecipe.append(IngredientInRecipe(
+                obj_ingredieninrecipe.append(IngredientInRecipe(
                     recipe=recipe,
                     ingredient_id=ingredient['id'],
                     amount=ingredient['amount']
                 ))
-            IngredientInRecipe.objects.bulk_create(obj_ingredienInRecipe)
+            IngredientInRecipe.objects.bulk_create(obj_ingredieninrecipe)
 
     def create(self, validated_data):
         tags = self.initial_data['tags']

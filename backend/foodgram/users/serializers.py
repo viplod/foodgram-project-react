@@ -1,8 +1,9 @@
-from djoser.serializers import UserCreateSerializer as BaseUserCreateSerializer
-from djoser.serializers import UserSerializer as BaseUserSerializer
+from djoser.serializers import (
+    UserCreateSerializer as BaseUserCreateSerializer,
+    UserSerializer as BaseUserSerializer
+)
 from rest_framework import serializers
 
-import recipes
 from recipes.models import Recipe
 from .models import Follow
 
@@ -80,8 +81,8 @@ class FollowingSerializer(serializers.ModelSerializer):
         if recipes_limit:
             queryset = Recipe.objects.filter(
                 author=obj.author)[:int(recipes_limit)]
-        # recipes_serializer = recipes.serializers.FollowRecipeSerializer(
-        recipes_serializer = recipes.serializers.FollowRecipeSerializer(
+        from recipes.serializers import FollowRecipeSerializer
+        recipes_serializer = FollowRecipeSerializer(
             queryset, many=True, read_only=True)
         return recipes_serializer.data
 

@@ -1,3 +1,4 @@
+from django.db.models import Sum
 from django.http.response import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters import rest_framework as filters
@@ -59,7 +60,6 @@ class RecipesViewSet(viewsets.ModelViewSet):
     def favorite(self, request, pk=None):
         return self.__add_or_delete_record(FavoriteRecipe, request, pk)
 
-
     @action(detail=True,
             url_path='shopping_cart',
             methods=['post', 'delete'],
@@ -68,39 +68,25 @@ class RecipesViewSet(viewsets.ModelViewSet):
     def shopping_cart(self, request, pk=None):
         return self.__add_or_delete_record(ShoppingRecipe, request, pk)
 
-
     @action(detail=False,
             url_path='download_shopping_cart',
             methods=['get'],
             permission_classes=[IsAuthenticated],
             )
     def download_shopping_cart(self, request):
-        recipes_all = request.user.shopping_cart.all()
-        list_ingredients = {}
-        for recipe_one in recipes_all:
-            ingredients = IngredientInRecipe.objects.filter(
-                recipe=recipe_one.recipe
-            )
-            for ingredient in ingredients:
-                name = ingredient.ingredient.name
-                amount = ingredient.amount
-                measuerment_unit = ingredient.ingredient.measurement_unit
-                if name not in list_ingredients:
-                    list_ingredients[name] = {
-                        'amount': amount,
-                        'measurement_unit': measuerment_unit
-                    }
-                else:
-                    list_ingredients[name]['amount'] += amount
+        ingredient_all = IngredientInRecipe.objects.filter(
+            recipe__shopping_cart__user=request.user
+        ).values(
+            'ingredient__name', 'ingredient__measurement_unit'
+        ).annotate(sum_amount=Sum('amount'))
         on_print = []
-        for elem in list_ingredients:
-            on_print.append(f'{elem.capitalize()} '
-                            f'({list_ingredients[elem]["measurement_unit"]}) '
-                            f'- {list_ingredients[elem]["amount"]} \n')
+        for elem in ingredient_all:
+            on_print.append(f'{elem["ingredient__name"].capitalize()} '
+                            f'({elem["ingredient__measurement_unit"]}) '
+                            f'- {elem["sum_amount"]} \n')
         response = HttpResponse(on_print, 'Content-type: text/plain')
         response['Content-Disposition'] = ('attachment; '
                                            'filename="shopping_cart.txt"')
-
         return response
 
 
