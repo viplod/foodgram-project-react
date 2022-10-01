@@ -8,7 +8,6 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from users.permissions import AuthorOrReadonly
-
 from .filters import IngredientFilter, RecipeFilter
 from .models import (
     FavoriteRecipe, Ingredient, IngredientInRecipe, Recipe, ShoppingRecipe,
@@ -18,6 +17,7 @@ from .pagination import RecipePagination
 from .serializers import (
     IngredientsSerializer, RecipesSerializer, TagsSerializer
 )
+from .services import get_text_on_print
 
 
 class TagsViewSet(viewsets.ReadOnlyModelViewSet):
@@ -40,16 +40,17 @@ class RecipesViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         return serializer.save(author=self.request.user)
 
-    def __add_or_delete_record(self, model, request, pk=None):
+    @staticmethod
+    def __add_or_delete_record(model, user, method, pk=None):
         recipe = get_object_or_404(Recipe, id=pk)
-        if request.method == 'POST':
-            model.objects.create(user=request.user, recipe=recipe)
+        if method == 'POST':
+            model.objects.create(user=user, recipe=recipe)
             serializer = RecipesSerializer(recipe)
             return Response(
                 data=serializer.data,
                 status=status.HTTP_201_CREATED)
         model.objects.filter(
-            user=request.user, recipe=recipe).delete()
+            user=user, recipe=recipe).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=True,
@@ -58,7 +59,11 @@ class RecipesViewSet(viewsets.ModelViewSet):
             permission_classes=[IsAuthenticated],
             )
     def favorite(self, request, pk=None):
-        return self.__add_or_delete_record(FavoriteRecipe, request, pk)
+        user = request.user
+        method = request.method
+        return RecipesViewSet.__add_or_delete_record(
+            FavoriteRecipe, user, method, pk
+        )
 
     @action(detail=True,
             url_path='shopping_cart',
@@ -66,7 +71,10 @@ class RecipesViewSet(viewsets.ModelViewSet):
             permission_classes=[IsAuthenticated],
             )
     def shopping_cart(self, request, pk=None):
-        return self.__add_or_delete_record(ShoppingRecipe, request, pk)
+        user = request.user
+        method = request.method
+        return RecipesViewSet.__add_or_delete_record(
+            ShoppingRecipe, user, method, pk)
 
     @action(detail=False,
             url_path='download_shopping_cart',
@@ -79,12 +87,8 @@ class RecipesViewSet(viewsets.ModelViewSet):
         ).values(
             'ingredient__name', 'ingredient__measurement_unit'
         ).annotate(sum_amount=Sum('amount'))
-        on_print = []
-        for elem in ingredient_all:
-            on_print.append(f'{elem["ingredient__name"].capitalize()} '
-                            f'({elem["ingredient__measurement_unit"]}) '
-                            f'- {elem["sum_amount"]} \n')
-        response = HttpResponse(on_print, 'Content-type: text/plain')
+        text_on_print = get_text_on_print(ingredient_all)
+        response = HttpResponse(text_on_print, 'Content-type: text/plain')
         response['Content-Disposition'] = ('attachment; '
                                            'filename="shopping_cart.txt"')
         return response

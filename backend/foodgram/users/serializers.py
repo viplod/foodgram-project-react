@@ -4,6 +4,7 @@ from djoser.serializers import (
 )
 from rest_framework import serializers
 
+from recipes.fields import Base64ImageField
 from recipes.models import Recipe
 from .models import Follow
 
@@ -81,10 +82,18 @@ class FollowingSerializer(serializers.ModelSerializer):
         if recipes_limit:
             queryset = Recipe.objects.filter(
                 author=obj.author)[:int(recipes_limit)]
-        from recipes.serializers import FollowRecipeSerializer
         recipes_serializer = FollowRecipeSerializer(
             queryset, many=True, read_only=True)
         return recipes_serializer.data
 
     def get_recipes_count(self, obj):
         return Recipe.objects.filter(author=obj.author).count()
+
+
+class FollowRecipeSerializer(serializers.ModelSerializer):
+    """Сериализатор для упаковки рецептов в Follow"""
+    image = Base64ImageField(required=False, allow_null=True)
+
+    class Meta:
+        model = Recipe
+        fields = ('id', 'name', 'image', 'cooking_time')

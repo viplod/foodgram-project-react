@@ -2,7 +2,6 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
 from users.serializers import UserSerializer
-
 from .models import (
     FavoriteRecipe, Ingredient, IngredientInRecipe, Recipe, ShoppingRecipe,
     Tag,
@@ -77,16 +76,17 @@ class RecipesSerializer(serializers.ModelSerializer):
         return ShoppingRecipe.objects.filter(
             recipe=obj, user=request.user).exists()
 
-    def __create_ingredient(self, recipe, ingredients):
-        obj_ingredieninrecipe = []
+    @staticmethod
+    def __create_ingredient(recipe, ingredients):
+        list_obj = []
         if ingredients:
             for ingredient in ingredients:
-                obj_ingredieninrecipe.append(IngredientInRecipe(
+                list_obj.append(IngredientInRecipe(
                     recipe=recipe,
                     ingredient_id=ingredient['id'],
                     amount=ingredient['amount']
                 ))
-            IngredientInRecipe.objects.bulk_create(obj_ingredieninrecipe)
+            IngredientInRecipe.objects.bulk_create(list_obj)
 
     def create(self, validated_data):
         tags = self.initial_data['tags']
@@ -95,7 +95,7 @@ class RecipesSerializer(serializers.ModelSerializer):
             for tag in tags:
                 recipe.tags.add(tag)
         ingredients = self.initial_data['ingredients']
-        self.create_ingredient(recipe, ingredients)
+        Recipe.__create_ingredient(recipe, ingredients)
         recipe.save()
         return recipe
 
@@ -106,7 +106,7 @@ class RecipesSerializer(serializers.ModelSerializer):
                 instance.tags.add(tag)
         ingredients = self.initial_data['ingredients']
         IngredientInRecipe.objects.filter(recipe=instance).delete()
-        self.create_ingredient(instance, ingredients)
+        Recipe.__create_ingredient(instance, ingredients)
         return super().update(instance, validated_data)
 
 

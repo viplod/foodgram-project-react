@@ -5,7 +5,6 @@ from rest_framework import viewsets
 from rest_framework.decorators import action
 
 from users.permissions import AuthorOrReadonly
-
 from .models import Follow, User
 from .serializers import FollowingSerializer, FollowSerializer
 

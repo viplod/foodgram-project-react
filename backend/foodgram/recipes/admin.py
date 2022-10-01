@@ -30,5 +30,5 @@ class IngredientAdmin(admin.ModelAdmin):
 
 @admin.register(Tag, IngredientInRecipe, TagRecipe, FavoriteRecipe,
                 ShoppingRecipe)
-class PersonAdmin(admin.ModelAdmin):
+class CustomAdmin(admin.ModelAdmin):
     pass
