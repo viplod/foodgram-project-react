@@ -108,12 +108,3 @@ class RecipesSerializer(serializers.ModelSerializer):
         IngredientInRecipe.objects.filter(recipe=instance).delete()
         Recipe.__create_ingredient(instance, ingredients)
         return super().update(instance, validated_data)
-
-
-class FollowRecipeSerializer(serializers.ModelSerializer):
-    """Сериализатор для упаковки рецептов в Follow"""
-    image = Base64ImageField(required=False, allow_null=True)
-
-    class Meta:
-        model = Recipe
-        fields = ('id', 'name', 'image', 'cooking_time')
