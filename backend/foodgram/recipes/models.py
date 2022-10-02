@@ -70,8 +70,8 @@ class Recipe(models.Model):
         validators=[MinValueValidator(
             1,
             'Время приготовления должно быть больше 1 минуты')
-            ]
-        )
+        ]
+    )
     image = models.ImageField(
         upload_to='recipes/images/',
         verbose_name='Изображение'
