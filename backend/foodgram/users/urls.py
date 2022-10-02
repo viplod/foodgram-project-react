@@ -4,8 +4,7 @@ from users.views import SubscribeViewSet
 
 urlpatterns = [
     path('users/subscriptions/', SubscribeViewSet.as_view(
-        {'get': 'list'}
-        )
+        {'get': 'list'})
     ),
     path('', include('djoser.urls')),
     re_path(r'^auth/', include('djoser.urls.authtoken')),
