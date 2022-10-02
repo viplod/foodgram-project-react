@@ -8,7 +8,7 @@ from users.models import User
 class Tag(models.Model):
     """Модель для работы с тегами"""
     name = models.CharField(
-        max_length=50,   # В redoc - string <= 200 characters
+        max_length=50,
         verbose_name='Название тега',
         unique=True
     )
@@ -19,7 +19,7 @@ class Tag(models.Model):
     )
     slug = models.SlugField(
         unique=True,
-        max_length=50,   # В redoc - string <= 200 characters
+        max_length=50,
         verbose_name='Slug тега',
     )
 
@@ -39,7 +39,7 @@ class Ingredient(models.Model):
         verbose_name='Название ингредиента'
     )
     measurement_unit = models.CharField(
-        max_length=200,
+        max_length=50,
         verbose_name='Единица измерения'
     )
 

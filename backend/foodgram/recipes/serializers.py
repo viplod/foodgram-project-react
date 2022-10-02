@@ -95,7 +95,7 @@ class RecipesSerializer(serializers.ModelSerializer):
             for tag in tags:
                 recipe.tags.add(tag)
         ingredients = self.initial_data['ingredients']
-        Recipe.__create_ingredient(recipe, ingredients)
+        RecipesSerializer.__create_ingredient(recipe, ingredients)
         recipe.save()
         return recipe
 
@@ -106,5 +106,5 @@ class RecipesSerializer(serializers.ModelSerializer):
                 instance.tags.add(tag)
         ingredients = self.initial_data['ingredients']
         IngredientInRecipe.objects.filter(recipe=instance).delete()
-        Recipe.__create_ingredient(instance, ingredients)
+        RecipesSerializer.__create_ingredient(instance, ingredients)
         return super().update(instance, validated_data)
