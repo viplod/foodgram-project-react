@@ -4,9 +4,9 @@ services:
   db:
     image: postgres:13.0-alpine
     volumes:
-      - db_vol:/var/lib/postgresgl/data/
+      - /var/lib/postgresgl/data/
     env_file:
-      - .env
+      - ../.env
 
   # frontend:
   #   build:
@@ -24,7 +24,7 @@ services:
     depends_on:
       - db
     env_file:
-      - .env  
+      - ../.env  
 
   nginx:
     image: nginx:1.19.3
