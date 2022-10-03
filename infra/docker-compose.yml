@@ -8,12 +8,12 @@ services:
     env_file:
       - .env
 
-  frontend:
-    build:
-      context: ../frontend
-      dockerfile: Dockerfile
-    volumes:
-      - ../frontend/:/app/result_build/
+  # frontend:
+  #   build:
+  #     context: ../frontend
+  #     dockerfile: Dockerfile
+  #   volumes:
+  #     - ../frontend/:/app/result_build/
 
   backend:
     image: viplod/foodgram:v1.0
