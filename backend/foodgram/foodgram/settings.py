@@ -14,7 +14,7 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 
 DEBUG = os.getenv('DEBUG')
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['*', '51.250.65.96']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -136,7 +136,7 @@ DJOSER = {
 }
 
 
-DATA_DIR = Path(__file__).resolve().parent.parent.parent.parent
-STATICFILES_DIRS = (os.path.join(DATA_DIR, ''),)
+# DATA_DIR = Path(__file__).resolve().parent.parent.parent.parent
+# STATICFILES_DIRS = (os.path.join(DATA_DIR, ''),)
 
 SLICE_REVIEW = 30
