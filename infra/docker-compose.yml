@@ -6,12 +6,12 @@ services:
     volumes:
       - /var/lib/postgresgl/data/
     env_file:
-      - ../.env
+      - ./.env
 
   frontend:
     image: viplod/foogramfront:v1.0
     volumes:
-      - ../frontend/:/app/result_build/
+      - ./frontend/:/app/result_build/
 
   backend:
     image: viplod/foodgram:v1.0
@@ -24,7 +24,7 @@ services:
     depends_on:
       - db
     env_file:
-      - ../.env  
+      - ./.env  
 
   nginx:
     image: nginx:1.19.3
