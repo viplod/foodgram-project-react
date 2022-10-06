@@ -23,7 +23,7 @@ class Command(BaseCommand):
             self.style.ERROR(
                 f'Ошибка ошибка ошибка: {file}'
             )
-        )        
+        )
         if not file:
             self.stdout.write(
                 self.style.ERROR(
