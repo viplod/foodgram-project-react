@@ -9,7 +9,8 @@ from recipes.models import Ingredient
 
 def get_model_csv_filename():
     csv_file = 'ingredients.csv'
-    file_path = f'{settings.DATAFILES_DIRS[0]}data/{csv_file}'
+    data_dir = os.path.join(settings.BASE_DIR, 'data')
+    file_path = f'{data_dir}/{csv_file}'
     return file_path if os.path.isfile(file_path) else None
 
 
@@ -19,11 +20,6 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         file = get_model_csv_filename()
-        self.stdout.write(
-            self.style.ERROR(
-                f'Ошибка ошибка ошибка: {file}'
-            )
-        )
         if not file:
             self.stdout.write(
                 self.style.ERROR(
