@@ -1,6 +1,7 @@
 ![API for YaMDB](https://github.com/viplod/foodgram-project-react/actions/workflows/foodgram_workflow.yml/badge.svg?branch=master)
 
-Проект размещается по адресу http://51.250.65.96/
+Проект размещается по адресу http://viplod.sytes.net/
+Для просмотра функционала админки сайта viplod@yandex.ru:123
 
 # Проект Foodgram - продуктовый помощник
 
