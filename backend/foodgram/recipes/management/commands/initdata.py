@@ -9,7 +9,7 @@ from recipes.models import Ingredient
 
 def get_model_csv_filename():
     csv_file = 'ingredients.csv'
-    file_path = f'{settings.DATA_DIR[0]}data/{csv_file}'
+    file_path = f'{settings.DATAFILES_DIRS[0]}data/{csv_file}'
     return file_path if os.path.isfile(file_path) else None
 
 
