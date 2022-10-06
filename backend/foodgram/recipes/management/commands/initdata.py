@@ -19,6 +19,11 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         file = get_model_csv_filename()
+        self.stdout.write(
+            self.style.ERROR(
+                f'Ошибка ошибка ошибка: {file}'
+            )
+        )        
         if not file:
             self.stdout.write(
                 self.style.ERROR(
