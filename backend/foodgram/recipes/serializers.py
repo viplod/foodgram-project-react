@@ -81,6 +81,7 @@ class RecipesSerializer(serializers.ModelSerializer):
         list_obj = []
         if ingredients:
             for ingredient in ingredients:
+                raise ValueError(ingredient['amount'])
                 print('!!!!!!!!!!!!')
                 print(ingredient['amount'])
                 # if ingredient['amount'] <= 0:
