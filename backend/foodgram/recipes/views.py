@@ -39,10 +39,10 @@ class RecipesViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         raise ValueError(f'Это {serializer} и дата {serializer.data}')
-                    # if int(ingredient['amount']) <= 0:
-                    # raise serializers.ValidationError(
-                    #     f'Количество {ingredient["amount"]}'
-                    #     f' должно быть больше 0')    
+        # if int(ingredient['amount']) <= 0:
+        # raise serializers.ValidationError(
+        #     f'Количество {ingredient["amount"]}'
+        #     f' должно быть больше 0')
         return serializer.save(author=self.request.user)
 
     @staticmethod
