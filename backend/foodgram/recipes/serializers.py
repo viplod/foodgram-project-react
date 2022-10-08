@@ -106,6 +106,7 @@ class RecipesSerializer(serializers.ModelSerializer):
                 recipe.tags.add(tag)
         ingredients = self.initial_data['ingredients']
         result = self.__create_ingredient(recipe, ingredients)
+        raise ValueError(f'Результат {result}')
         if result:
             recipe.save()
         return recipe
