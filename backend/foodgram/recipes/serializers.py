@@ -68,7 +68,11 @@ class RecipesSerializer(serializers.ModelSerializer):
                   'is_in_shopping_cart')
 
     def validate(self, data):
-        raise ValueError(f'{data}')
+        ingredients = self.initial_data['ingredients']
+        for ingredient in ingredients:
+            if ingredient['amount'] <= 0:
+                raise serializers.ValidationError(
+                    'Количество ингредиента должено быть больше 0')
         return data
 
     def get_is_favorited(self, obj):
