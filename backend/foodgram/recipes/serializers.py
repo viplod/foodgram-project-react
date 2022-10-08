@@ -62,13 +62,6 @@ class RecipesSerializer(serializers.ModelSerializer):
                   'image', 'text', 'cooking_time', 'is_favorited',
                   'is_in_shopping_cart')
 
-    def validate_ingredients(self, value):
-        for ingredient in value:
-            if ingredient['amount'] < 1:
-                raise serializers.ValidationError(
-                    'Количество должно быть равным или больше 1!')
-        return value
-
     def get_is_favorited(self, obj):
         request = self.context.get('request')
         if request is None or request.user.is_anonymous:
@@ -88,6 +81,11 @@ class RecipesSerializer(serializers.ModelSerializer):
         list_obj = []
         if ingredients:
             for ingredient in ingredients:
+                print('!!!!!!!!!!!!')
+                print(ingredient['amount'])
+                # if ingredient['amount'] <= 0:
+                #     raise serializers.ValidationError(
+                #         'Количество должно быть больше 0')
                 list_obj.append(IngredientInRecipe(
                     recipe=recipe,
                     ingredient_id=ingredient['id'],
