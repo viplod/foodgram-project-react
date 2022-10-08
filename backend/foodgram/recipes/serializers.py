@@ -67,6 +67,10 @@ class RecipesSerializer(serializers.ModelSerializer):
                   'image', 'text', 'cooking_time', 'is_favorited',
                   'is_in_shopping_cart')
 
+    def validate(self, data):
+        raise ValueError(f'{data}')
+        return data
+
     def get_is_favorited(self, obj):
         request = self.context.get('request')
         if request is None or request.user.is_anonymous:
@@ -100,8 +104,7 @@ class RecipesSerializer(serializers.ModelSerializer):
             for tag in tags:
                 recipe.tags.add(tag)
         ingredients = self.initial_data['ingredients']
-        result = self.__create_ingredient(recipe, ingredients)
-        raise ValueError(f'Результат {result}')
+        self.__create_ingredient(recipe, ingredients)
         recipe.save()
         return recipe
 
