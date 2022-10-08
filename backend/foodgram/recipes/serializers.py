@@ -86,17 +86,12 @@ class RecipesSerializer(serializers.ModelSerializer):
         list_obj = []
         if ingredients:
             for ingredient in ingredients:
-                if int(ingredient['amount']) <= 0:
-                    raise serializers.ValidationError(
-                        f'Количество {ingredient["amount"]}'
-                        f' должно быть больше 0')
                 list_obj.append(IngredientInRecipe(
                     recipe=recipe,
                     ingredient_id=ingredient['id'],
                     amount=ingredient['amount']
                 ))
             IngredientInRecipe.objects.bulk_create(list_obj)
-        return True
 
     def create(self, validated_data):
         tags = self.initial_data['tags']
@@ -107,8 +102,7 @@ class RecipesSerializer(serializers.ModelSerializer):
         ingredients = self.initial_data['ingredients']
         result = self.__create_ingredient(recipe, ingredients)
         raise ValueError(f'Результат {result}')
-        if result:
-            recipe.save()
+        recipe.save()
         return recipe
 
     def update(self, instance, validated_data):
