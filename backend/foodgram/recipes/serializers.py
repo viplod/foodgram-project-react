@@ -88,7 +88,8 @@ class RecipesSerializer(serializers.ModelSerializer):
             for ingredient in ingredients:
                 if int(ingredient['amount']) <= 0:
                     raise serializers.ValidationError(
-                        f'Количество {ingredient["amount"]} должно быть больше 0')
+                        f'Количество {ingredient["amount"]}'
+                        f' должно быть больше 0')
                 list_obj.append(IngredientInRecipe(
                     recipe=recipe,
                     ingredient_id=ingredient['id'],
