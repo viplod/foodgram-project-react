@@ -22,7 +22,7 @@ class RecipeFilter(filters.FilterSet):
             return queryset.filter(favorite__user=self.request.user)
         return queryset
 
-    def get_get_is_in_shopping_cart(self, queryset, name, value):
+    def get_is_in_shopping_cart(self, queryset, name, value):
         if self.request.user.is_authenticated and value is True:
             return queryset.filter(shopping_cart__user=self.request.user)
         return queryset
