@@ -1,3 +1,4 @@
+from django.core.validators import MinValueValidator
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
@@ -34,6 +35,10 @@ class IngredientsInRecipesSerializer(serializers.ModelSerializer):
                 queryset=IngredientInRecipe.objects.all(),
                 fields=('ingredient', 'recipe')
             ),
+            MinValueValidator(
+                1,
+                'Количество ингредиента должно быть больше 1'
+            )
         )
 
 
@@ -81,18 +86,16 @@ class RecipesSerializer(serializers.ModelSerializer):
         list_obj = []
         if ingredients:
             for ingredient in ingredients:
-                raise ValueError(ingredient['amount'])
-                print('!!!!!!!!!!!!')
-                print(ingredient['amount'])
-                # if ingredient['amount'] <= 0:
-                #     raise serializers.ValidationError(
-                #         'Количество должно быть больше 0')
+                if int(ingredient['amount']) <= 0:
+                    raise serializers.ValidationError(
+                        f'Количество {ingredient["amount"]} должно быть больше 0')
                 list_obj.append(IngredientInRecipe(
                     recipe=recipe,
                     ingredient_id=ingredient['id'],
                     amount=ingredient['amount']
                 ))
             IngredientInRecipe.objects.bulk_create(list_obj)
+        return True
 
     def create(self, validated_data):
         tags = self.initial_data['tags']
@@ -101,8 +104,9 @@ class RecipesSerializer(serializers.ModelSerializer):
             for tag in tags:
                 recipe.tags.add(tag)
         ingredients = self.initial_data['ingredients']
-        self.__create_ingredient(recipe, ingredients)
-        recipe.save()
+        result = self.__create_ingredient(recipe, ingredients)
+        if result:
+            recipe.save()
         return recipe
 
     def update(self, instance, validated_data):
