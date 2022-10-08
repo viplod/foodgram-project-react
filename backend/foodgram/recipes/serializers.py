@@ -70,7 +70,7 @@ class RecipesSerializer(serializers.ModelSerializer):
     def validate(self, data):
         ingredients = self.initial_data['ingredients']
         for ingredient in ingredients:
-            if ingredient['amount'] <= 0:
+            if int(ingredient['amount']) <= 0:
                 raise serializers.ValidationError(
                     'Количество ингредиента должено быть больше 0')
         return data
